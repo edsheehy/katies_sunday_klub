@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "28023208610",
+    "project_id": "katies-sunday-klub",
+    "storage_bucket": "katies-sunday-klub.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:28023208610:android:23513898a91eebd59135fb",
+        "android_client_info": {
+          "package_name": "app.katiessundayklub.katies_sunday_klub"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNpeLNf-xKc2ruGoU_Y2J5UtDMYko3-GU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

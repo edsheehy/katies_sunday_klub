@@ -1,0 +1,39 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "katies-sunday-klub",
+          "appId": "1:28023208610:android:23513898a91eebd59135fb",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "katies-sunday-klub",
+          "configurations": {
+            "android": "1:28023208610:android:23513898a91eebd59135fb",
+            "ios": "1:28023208610:ios:5138dcc083113f8b9135fb",
+            "macos": "1:28023208610:ios:5138dcc083113f8b9135fb",
+            "web": "1:28023208610:web:f9b15a4625f6bc309135fb",
+            "windows": "1:28023208610:web:99c501b719310a1b9135fb"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
