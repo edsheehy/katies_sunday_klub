@@ -17,7 +17,6 @@ class EditHolderScreen extends ConsumerStatefulWidget {
 }
 
 class _EditHolderScreenState extends ConsumerState<EditHolderScreen> {
-  // Add a new controller for the balance field.
   late final TextEditingController _nameController;
   late final TextEditingController _balanceController;
   final _formKey = GlobalKey<FormState>();
@@ -26,7 +25,6 @@ class _EditHolderScreenState extends ConsumerState<EditHolderScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize both controllers with the current ticket data.
     _nameController = TextEditingController(text: widget.ticketHolder.holders);
     _balanceController = TextEditingController(text: widget.ticketHolder.balance.toStringAsFixed(2));
   }
@@ -45,13 +43,11 @@ class _EditHolderScreenState extends ConsumerState<EditHolderScreen> {
         _isLoading = true;
       });
 
-      // Parse the balance from the text field.
       final newBalance = double.tryParse(_balanceController.text);
 
       try {
-        // Use the new, more flexible repository method.
-        final repository = ref.read(ticketRepositoryProvider);
-        await repository.updateTicketDetails(
+        // CORRECTED: Use the new, simplified ticketActionsProvider.
+        await ref.read(ticketActionsProvider).updateTicketDetails(
           ticketId: widget.ticketHolder.id,
           holders: _nameController.text,
           balance: newBalance,
@@ -83,7 +79,6 @@ class _EditHolderScreenState extends ConsumerState<EditHolderScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // Updated title to be more generic.
         title: Text('Edit Ticket #${widget.ticketHolder.id}'),
       ),
       body: Padding(
@@ -93,9 +88,9 @@ class _EditHolderScreenState extends ConsumerState<EditHolderScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Name Text Field
               TextFormField(
                 controller: _nameController,
+                autofocus: true,
                 decoration: const InputDecoration(
                   labelText: 'Holder Name(s)',
                   border: OutlineInputBorder(),
@@ -108,7 +103,6 @@ class _EditHolderScreenState extends ConsumerState<EditHolderScreen> {
                 },
               ),
               const SizedBox(height: 20),
-              // NEW: Balance Text Field
               TextFormField(
                 controller: _balanceController,
                 decoration: const InputDecoration(
@@ -116,7 +110,6 @@ class _EditHolderScreenState extends ConsumerState<EditHolderScreen> {
                   prefixText: '€',
                   border: OutlineInputBorder(),
                 ),
-                // Use a regex to allow only numbers and a single decimal point.
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
@@ -137,7 +130,7 @@ class _EditHolderScreenState extends ConsumerState<EditHolderScreen> {
                   : ElevatedButton.icon(
                 icon: const Icon(Icons.save),
                 label: const Text('Save Changes'),
-                onPressed: _saveChanges, // Call the updated save function
+                onPressed: _saveChanges,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                 ),

@@ -108,7 +108,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final auth = _ref.read(firebaseAuthProvider);
       final userCredential = await auth.signInWithEmailAndPassword(
         email: 'edsheehy@gmail.com',
-        password: 'Admiroah14*0',
+        password: 'Admirkah02*0',
       );
 
       state = state.copyWith(

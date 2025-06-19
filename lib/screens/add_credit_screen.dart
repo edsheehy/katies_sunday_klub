@@ -54,8 +54,8 @@ class _AddCreditScreenState extends ConsumerState<AddCreditScreen> {
       });
 
       try {
-        final repository = ref.read(ticketRepositoryProvider);
-        await repository.addCredit(widget.ticketHolder.id, amount);
+        // CORRECTED: Use the new, simplified ticketActionsProvider.
+        await ref.read(ticketActionsProvider).addCredit(widget.ticketHolder.id, amount);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -94,7 +94,7 @@ class _AddCreditScreenState extends ConsumerState<AddCreditScreen> {
             children: [
               Text(
                 'Current Balance: €${widget.ticketHolder.balance.toStringAsFixed(2)}',
-                style: Theme.of(context).textTheme.headlineMedium,
+                style: Theme.of(context).textTheme.headlineSmall,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -106,7 +106,6 @@ class _AddCreditScreenState extends ConsumerState<AddCreditScreen> {
                   prefixText: '€',
                   border: OutlineInputBorder(),
                 ),
-                // Use a regex to allow only numbers and a single decimal point.
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
@@ -125,18 +124,16 @@ class _AddCreditScreenState extends ConsumerState<AddCreditScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              // Quick-add buttons for common amounts
               Wrap(
                 spacing: 8.0,
                 alignment: WrapAlignment.center,
                 children: [
                   ElevatedButton(onPressed: () => _addPredefinedAmount(10), child: const Text('€10')),
                   ElevatedButton(onPressed: () => _addPredefinedAmount(20), child: const Text('€20')),
-                  ElevatedButton(onPressed: () => _addPredefinedAmount(40), child: const Text('€40')),
                   ElevatedButton(onPressed: () => _addPredefinedAmount(50), child: const Text('€50')),
                 ],
               ),
-              const Spacer(), // Pushes the button to the bottom
+              const Spacer(),
               _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : ElevatedButton.icon(
@@ -144,7 +141,9 @@ class _AddCreditScreenState extends ConsumerState<AddCreditScreen> {
                 label: const Text('Add Credit'),
                 onPressed: _addCredit,
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0), backgroundColor: Colors.green, // A distinct color for adding money
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
                 ),
               ),
             ],
