@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:katies_sunday_klub/providers/auth_providers.dart';
+import 'package:katies_sunday_klub/providers/package_info_provider.dart';
 import 'screens/home_screen.dart';
 import 'firebase_options.dart';
 
@@ -20,6 +21,7 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    var test = ref.read(packageInfoProvider);
     return MaterialApp(
       title: 'Katie\'s Sunday Klub',
       theme: ThemeData(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:katies_sunday_klub/models/ticket_holder_model.dart';
+import 'package:katies_sunday_klub/providers/package_info_provider.dart';
 import 'package:katies_sunday_klub/providers/providers.dart';
 import 'package:katies_sunday_klub/screens/add_credit_screen.dart';
 import 'package:katies_sunday_klub/screens/edit_holder_screen.dart';
@@ -13,49 +14,72 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Watch the ticketsProvider to get the stream of ticket holders.
     final ticketsAsyncValue = ref.watch(ticketsProvider);
-    // Watch the authStateChangesProvider to get the current user.
     final authState = ref.watch(authStateChangesProvider);
+    final packageInfoAsyncValue = ref.watch(packageInfoProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Katie's Sunday Klub"),
-        // The logout button is now in the drawer, so it's removed from actions.
       ),
-      // --- START: NEW DRAWER ---
       drawer: Drawer(
         child: ListView(
-          // Important: Remove any padding from the ListView.
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
               decoration: BoxDecoration(
                 color: Theme.of(context).primaryColor,
               ),
-              child: Text(
-                // Display the user's email, or 'Loading...' if not available.
-                authState.when(
-                  data: (user) => user?.email ?? 'No user logged in',
-                  loading: () => 'Loading...',
-                  error: (err, stack) => 'Error',
-                ),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    authState.when(
+                      data: (user) => user?.email ?? 'No user logged in',
+                      loading: () => 'Loading...',
+                      error: (err, stack) => 'Error',
+                    ),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  packageInfoAsyncValue.when(
+                    data: (packageInfo) => Text(
+                      'Version: ${packageInfo.version}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
+                    ),
+                    loading: () => const Text(
+                      'Loading version...',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
+                    ),
+                    error: (err, stack) => const Text(
+                      'Error loading version',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             ListTile(
               leading: const Icon(Icons.history),
               title: const Text('Transactions'),
               onTap: () {
-                // Close the drawer.
                 Navigator.pop(context);
-                // Navigate to the Transactions screen.
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const TransactionsScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const TransactionsScreen()),
                 );
               },
             ),
@@ -68,7 +92,6 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
       ),
-      // --- END: NEW DRAWER ---
       body: Column(
         children: [
           Padding(
@@ -109,8 +132,7 @@ class HomeScreen extends ConsumerWidget {
           Expanded(
             child: ticketsAsyncValue.when(
               data: (tickets) => _buildTicketList(tickets),
-              error:
-                  (err, stack) =>
+              error: (err, stack) =>
                   Center(child: Text('An error occurred: $err')),
               loading: () => const Center(child: CircularProgressIndicator()),
             ),
@@ -120,7 +142,6 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  /// Builds the scrollable list of tickets.
   Widget _buildTicketList(List<TicketHolder> tickets) {
     if (tickets.isEmpty) {
       return const Center(child: Text('No ticket data found.'));
