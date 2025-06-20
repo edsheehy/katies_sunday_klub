@@ -4,6 +4,7 @@ import 'package:katies_sunday_klub/models/ticket_holder_model.dart';
 import 'package:katies_sunday_klub/providers/providers.dart';
 import 'package:katies_sunday_klub/screens/add_credit_screen.dart';
 import 'package:katies_sunday_klub/screens/edit_holder_screen.dart';
+import 'package:katies_sunday_klub/screens/transactions_screen.dart';
 
 import '../providers/auth_providers.dart';
 
@@ -14,26 +15,62 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Watch the ticketsProvider to get the stream of ticket holders.
     final ticketsAsyncValue = ref.watch(ticketsProvider);
+    // Watch the authStateChangesProvider to get the current user.
+    final authState = ref.watch(authStateChangesProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Katie's Sunday Klub"),
-        actions: [
-          // IconButton(
-          //   icon: const Icon(Icons.upload_file),
-          //   tooltip: 'Upload Initial Data',
-          //   onPressed: () => _confirmAndUploadData(context, ref),
-          // ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => ref.read(authProvider.notifier).signOut(),
-          ),
-        ],
+        // The logout button is now in the drawer, so it's removed from actions.
       ),
-      // Using a Column to separate the static header from the scrollable list.
+      // --- START: NEW DRAWER ---
+      drawer: Drawer(
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+              ),
+              child: Text(
+                // Display the user's email, or 'Loading...' if not available.
+                authState.when(
+                  data: (user) => user?.email ?? 'No user logged in',
+                  loading: () => 'Loading...',
+                  error: (err, stack) => 'Error',
+                ),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.history),
+              title: const Text('Transactions'),
+              onTap: () {
+                // Close the drawer.
+                Navigator.pop(context);
+                // Navigate to the Transactions screen.
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TransactionsScreen()),
+                );
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Logout'),
+              onTap: () => ref.read(authProvider.notifier).signOut(),
+            ),
+          ],
+        ),
+      ),
+      // --- END: NEW DRAWER ---
       body: Column(
         children: [
-          // 1. This is the static header row that will not scroll.
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 16.0,
@@ -69,13 +106,12 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
           const Divider(height: 1, thickness: 1),
-          // 2. The list of tickets will now expand and scroll independently.
           Expanded(
             child: ticketsAsyncValue.when(
               data: (tickets) => _buildTicketList(tickets),
               error:
                   (err, stack) =>
-                      Center(child: Text('An error occurred: $err')),
+                  Center(child: Text('An error occurred: $err')),
               loading: () => const Center(child: CircularProgressIndicator()),
             ),
           ),
@@ -94,14 +130,14 @@ class HomeScreen extends ConsumerWidget {
       itemBuilder: (context, index) {
         final ticket = tickets[index];
         final balanceColor =
-            ticket.balance < 10 ? Colors.red.shade700 : Colors.green.shade800;
+        ticket.balance < 10 ? Colors.red.shade700 : Colors.green.shade800;
         return ListTile(
           leading: CircleAvatar(child: Text(ticket.id)),
           title: Text(
             ticket.holders.isEmpty ? 'Tap to assign' : ticket.holders,
           ),
           trailing: Text(
-            '€${ticket.balance.toStringAsFixed(2)}',
+            '€${ticket.balance.toStringAsFixed(0)}',
             style: TextStyle(
               color: balanceColor,
               fontWeight: FontWeight.bold,
@@ -128,102 +164,5 @@ class HomeScreen extends ConsumerWidget {
       },
       separatorBuilder: (context, index) => const Divider(height: 1),
     );
-  }
-
-  /// Shows a confirmation dialog before uploading data.
-  void _confirmAndUploadData(BuildContext context, WidgetRef ref) async {
-    final shouldUpload = await showDialog<bool>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Confirm Data Upload'),
-            content: const Text(
-              'This will upload the initial list of ticket holders. This should only be done once. Proceed?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('UPLOAD'),
-              ),
-            ],
-          ),
-    );
-
-    if (shouldUpload == true && context.mounted) {
-      _uploadInitialData(context, ref);
-    }
-  }
-
-  /// The upload function now uses the new provider.
-  void _uploadInitialData(BuildContext context, WidgetRef ref) async {
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final Map<String, String> holdersData = {
-      "3": "Rachel Fahy & Cong",
-      "4": "Jimmy O'Donohue & Pat Dela",
-      "5": "Haulie Kenny",
-      "6": "Mackey & Jockser",
-      "7": "Seven & Brid",
-      "8": "Smiley & Yvonne",
-      "9": "John Greaney & Hugh",
-      "10": "Jockser & Mackey",
-      "11": "Pa Moran & Mike Shanahan",
-      "12": "Carmel Fitzsimons",
-      "13": "Mick & Frankie Walsh",
-      "14": "Joe & Mick Walsh",
-      "15": "Mal Keaveney",
-      "16": "Ailbhe & Ronnie Kelly",
-      "17": "Colin & Catriona",
-      "18": "Pa Moran & Mikey Barr",
-      "19": "Jamie Moran",
-      "20": "Ed Sheehy & Denis Keating",
-      "21": "Mikey Barr",
-      "22": "Paul & Marie",
-      "23": "Luigi Lenihan",
-      "24": "Johnny McMahon",
-      "25": "Tommy Hartigan",
-      "26": "Mick Flannery & Deron",
-      "27": "Jackie & Pat Delahunty",
-      "28": "Mike & Gabrielle Horan",
-      "29": "Christy Walsh",
-      "30": "Alan & Ita Kehoe",
-      "31": "Ger Ranahan & Johnny McMahon",
-      "32": "Eddie & Noreen Ryan",
-      "33": "Pakie Moran",
-      "34": "Tara & Colm",
-      "35": "Francy O'Connell",
-      "36": "Ondine & Haulie",
-      "37": "Ronnie & Ailbhe Kelly",
-      "38": "Jake & Senan",
-      "39": "Anthony & Michelle McMahon",
-      "40": "Mike Murphy",
-      "41": "Noreen & Eddie Ryan",
-      "42": "Hannah & Eamon",
-      "43": "Deron Keating",
-      "44": "Tom Corrigan",
-      "45": "Pat Hehir",
-      "46": "John Stokes",
-      "47": "William & Ita Sheahan",
-      "48": "Ann Lenihan",
-      "49": "Danny Harty Snr.",
-      "50": "Richie Downes",
-    };
-
-    try {
-      scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Uploading...')),
-      );
-      await ref.read(ticketActionsProvider).batchUploadHolders(holdersData);
-      scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Upload successful!')),
-      );
-    } catch (e) {
-      scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('Upload failed: $e')),
-      );
-    }
   }
 }

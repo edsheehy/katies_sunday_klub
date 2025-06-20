@@ -34,17 +34,17 @@ class _AddCreditScreenState extends ConsumerState<AddCreditScreen> {
   }
 
   /// Adds a predefined amount to the text field.
-  void _addPredefinedAmount(double amount) {
-    _controller.text = amount.toStringAsFixed(2);
+  void _addPredefinedAmount(int amount) { // Changed parameter type to int
+    _controller.text = amount.toString(); // Changed to toString() for integer display
   }
 
   /// Handles the save action.
   Future<void> _addCredit() async {
     if (_formKey.currentState!.validate()) {
-      final amount = double.tryParse(_controller.text);
-      if (amount == null || amount <= 0) {
+      final amount = int.tryParse(_controller.text); // Changed to int.tryParse
+      if (amount == null || amount <= 0) { // Check for int amount
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please enter a valid amount.')),
+          const SnackBar(content: Text('Please enter a valid whole amount greater than zero.')),
         );
         return;
       }
@@ -55,11 +55,12 @@ class _AddCreditScreenState extends ConsumerState<AddCreditScreen> {
 
       try {
         // CORRECTED: Use the new, simplified ticketActionsProvider.
-        await ref.read(ticketActionsProvider).addCredit(widget.ticketHolder.id, amount);
+        await ref.read(ticketActionsProvider).addCredit(widget.ticketHolder.id, amount.toDouble()); // Pass as double if addCredit expects double
+        // If your addCredit method expects an int, remove .toDouble()
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('€$amount added successfully!')),
+            SnackBar(content: Text('€$amount added successfully!')), // Display as int
           );
           Navigator.of(context).pop();
         }
@@ -93,7 +94,7 @@ class _AddCreditScreenState extends ConsumerState<AddCreditScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Current Balance: €${widget.ticketHolder.balance.toStringAsFixed(2)}',
+                'Current Balance: €${widget.ticketHolder.balance.toInt().toString()}', // Display current balance as int
                 style: Theme.of(context).textTheme.headlineSmall,
                 textAlign: TextAlign.center,
               ),
@@ -107,17 +108,18 @@ class _AddCreditScreenState extends ConsumerState<AddCreditScreen> {
                   border: OutlineInputBorder(),
                 ),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d+')), // Allow only digits
                 ],
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: TextInputType.number, // Suggest numeric keyboard without decimal
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter an amount.';
                   }
-                  if (double.tryParse(value) == null) {
-                    return 'Please enter a valid number.';
+                  final parsedValue = int.tryParse(value); // Parse as int
+                  if (parsedValue == null) {
+                    return 'Please enter a valid whole number.';
                   }
-                  if (double.parse(value) <= 0) {
+                  if (parsedValue <= 0) { // Check for positive integer
                     return 'Amount must be greater than zero.';
                   }
                   return null;
@@ -128,9 +130,9 @@ class _AddCreditScreenState extends ConsumerState<AddCreditScreen> {
                 spacing: 8.0,
                 alignment: WrapAlignment.center,
                 children: [
-                  ElevatedButton(onPressed: () => _addPredefinedAmount(10), child: const Text('€10')),
-                  ElevatedButton(onPressed: () => _addPredefinedAmount(20), child: const Text('€20')),
-                  ElevatedButton(onPressed: () => _addPredefinedAmount(50), child: const Text('€50')),
+                  ElevatedButton(onPressed: () => _addPredefinedAmount(10), child: const Text('€10')), // Pass int
+                  ElevatedButton(onPressed: () => _addPredefinedAmount(20), child: const Text('€20')), // Pass int
+                  ElevatedButton(onPressed: () => _addPredefinedAmount(50), child: const Text('€50')), // Pass int
                 ],
               ),
               const Spacer(),

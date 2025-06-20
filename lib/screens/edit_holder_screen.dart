@@ -22,13 +22,19 @@ class _EditHolderScreenState extends ConsumerState<EditHolderScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _nameController = TextEditingController(text: widget.ticketHolder.holders);
+  //   _balanceController = TextEditingController(text: widget.ticketHolder.balance.toStringAsFixed(2));
+  // }
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.ticketHolder.holders);
-    _balanceController = TextEditingController(text: widget.ticketHolder.balance.toStringAsFixed(2));
+    // Change this line:
+    _balanceController = TextEditingController(text: widget.ticketHolder.balance.toInt().toString());
   }
-
   @override
   void dispose() {
     _nameController.dispose();
@@ -111,19 +117,40 @@ class _EditHolderScreenState extends ConsumerState<EditHolderScreen> {
                   border: OutlineInputBorder(),
                 ),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d+')), // Allows only digits
                 ],
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: TextInputType.number, // Suggests a numeric keyboard without decimal
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a balance.';
+                    return 'Please enter the correct balance.';
                   }
-                  if (double.tryParse(value) == null) {
-                    return 'Please enter a valid number.';
+                  if (int.tryParse(value) == null) { // Checks if it's a valid integer
+                    return 'Please enter a valid whole number.';
                   }
                   return null;
                 },
               ),
+              // TextFormField(
+              //   controller: _balanceController,
+              //   decoration: const InputDecoration(
+              //     labelText: 'Balance',
+              //     prefixText: '€',
+              //     border: OutlineInputBorder(),
+              //   ),
+              //   inputFormatters: [
+              //     FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+              //   ],
+              //   keyboardType: const TextInputType.numberWithOptions(decimal: false),
+              //   validator: (value) {
+              //     if (value == null || value.isEmpty) {
+              //       return 'Please enter a balance.';
+              //     }
+              //     if (double.tryParse(value) == null) {
+              //       return 'Please enter a valid number.';
+              //     }
+              //     return null;
+              //   },
+              // ),
               const SizedBox(height: 20),
               _isLoading
                   ? const Center(child: CircularProgressIndicator())

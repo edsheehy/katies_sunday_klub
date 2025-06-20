@@ -4,11 +4,46 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:katies_sunday_klub/models/ticket_holder_model.dart';
 import 'package:katies_sunday_klub/models/transaction_model.dart' as model;
 
+import '../models/transaction_with_ticket_id_model.dart';
+
 /// Provider that gives us the current authentication state.
 /// The app will react to changes here (e.g., login/logout).
 final authStateChangesProvider = StreamProvider<User?>((ref) {
   return FirebaseAuth.instance.authStateChanges();
 });
+
+/// --- START: NEW PROVIDER ---
+/// A StreamProvider that performs a collection group query to get all transactions
+/// from all ticket holders, ordered by timestamp.
+final allTransactionsProvider = StreamProvider<List<TransactionWithTicketId>>((ref) {
+  final authState = ref.watch(authStateChangesProvider);
+
+  // Only fetch data if a user is logged in.
+  if (authState.asData?.value == null) {
+    return Stream.value([]);
+  }
+
+  final collectionGroup = FirebaseFirestore.instance.collectionGroup('transactions');
+
+  return collectionGroup
+      .orderBy('timestamp', descending: true)
+      .snapshots()
+      .map((snapshot) {
+    return snapshot.docs.map((doc) {
+      // The document path is 'numbers/{ticketId}/transactions/{transactionId}'.
+      // We extract the ticketId from the path.
+      final ticketId = doc.reference.parent.parent!.id;
+      final transaction = model.Transaction.fromFirestore(doc);
+      return TransactionWithTicketId(ticketId: ticketId, transaction: transaction);
+    }).toList();
+  });
+});
+/// --- END: NEW PROVIDER ---
+
+
+/// A simple Provider that creates an instance of our TicketActions class
+/// for easy access to all data modification methods.
+final ticketActionsProvider = Provider((ref) => TicketActions());
 
 /// A StreamProvider that listens to the Firestore collection.
 /// It now watches the authStateChangesProvider and will only fetch data
@@ -28,10 +63,6 @@ final ticketsProvider = StreamProvider<List<TicketHolder>>((ref) {
     return docs.map((doc) => TicketHolder.fromFirestore(doc)).toList();
   });
 });
-
-/// A simple Provider that creates an instance of our TicketActions class
-/// for easy access to all data modification methods.
-final ticketActionsProvider = Provider((ref) => TicketActions());
 
 /// A simple class that consolidates all write/update/delete operations.
 class TicketActions {
