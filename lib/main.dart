@@ -21,7 +21,7 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    var test = ref.read(packageInfoProvider);
+    ref.read(packageInfoProvider);
     return MaterialApp(
       title: 'Katie\'s Sunday Klub',
       theme: ThemeData(

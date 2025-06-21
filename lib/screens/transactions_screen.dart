@@ -1,3 +1,4 @@
+// lib/screens/transactions_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -23,9 +24,16 @@ class TransactionsScreen extends ConsumerWidget {
             child: Row(
               children: [
                 const Expanded(
-                  flex: 3,
+                  flex: 2, // Adjusted flex for "Date"
                   child: Text(
                     'Date',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const Expanded(
+                  flex: 2, // New column for "Time"
+                  child: Text(
+                    'Time',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -63,18 +71,28 @@ class TransactionsScreen extends ConsumerWidget {
                     final transWithId = transactions[index];
                     final transaction = transWithId.transaction;
                     final formattedDate = DateFormat(
-                      'dd MMM yyyy',
-                    ).format(transaction.timestamp.toDate());
+                      'dd MMM',
+                    ).format(transaction.timestamp.toDate()); // Changed date format
+                    final formattedTime = DateFormat(
+                      'HH:mm',
+                    ).format(transaction.timestamp.toDate()); // New time format
                     final amountColor =
-                        transaction.isPayment
-                            ? Colors.green.shade800
-                            : Colors.red.shade700;
+                    transaction.isPayment
+                        ? Colors.green.shade800
+                        : Colors.red.shade700;
                     final amountPrefix = transaction.isPayment ? '+' : '-';
 
                     return ListTile(
                       title: Row(
                         children: [
-                          Expanded(flex: 3, child: Text(formattedDate)),
+                          Expanded(flex: 2, child: Text(formattedDate)), // Adjusted flex
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              formattedTime, // Display time
+                              textAlign: TextAlign.start,
+                            ),
+                          ),
                           Expanded(
                             flex: 2,
                             child: Text(
@@ -106,7 +124,7 @@ class TransactionsScreen extends ConsumerWidget {
               loading: () => const Center(child: CircularProgressIndicator()),
               error:
                   (err, stack) =>
-                      Center(child: Text('An error occurred: $err')),
+                  Center(child: Text('An error occurred: $err')),
             ),
           ),
         ],

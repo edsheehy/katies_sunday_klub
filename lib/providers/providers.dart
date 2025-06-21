@@ -1,3 +1,4 @@
+// lib/providers/providers.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,9 +13,8 @@ final authStateChangesProvider = StreamProvider<User?>((ref) {
   return FirebaseAuth.instance.authStateChanges();
 });
 
-/// --- START: NEW PROVIDER ---
 /// A StreamProvider that performs a collection group query to get all transactions
-/// from all ticket holders, ordered by timestamp.
+/// from all ticket holders, ordered by timestamp and limited to the last 100.
 final allTransactionsProvider = StreamProvider<List<TransactionWithTicketId>>((ref) {
   final authState = ref.watch(authStateChangesProvider);
 
@@ -27,6 +27,7 @@ final allTransactionsProvider = StreamProvider<List<TransactionWithTicketId>>((r
 
   return collectionGroup
       .orderBy('timestamp', descending: true)
+      .limit(100) // Limit to the last 100 transactions
       .snapshots()
       .map((snapshot) {
     return snapshot.docs.map((doc) {
@@ -38,7 +39,6 @@ final allTransactionsProvider = StreamProvider<List<TransactionWithTicketId>>((r
     }).toList();
   });
 });
-/// --- END: NEW PROVIDER ---
 
 
 /// A simple Provider that creates an instance of our TicketActions class
